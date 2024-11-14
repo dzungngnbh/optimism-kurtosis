@@ -5,7 +5,7 @@ input_parser = import_module("./package_io/input_parser.star")
 ethereum_package_static_files = import_module(
     "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
 )
-util = import_module("./util.star")
+utils = import_module("./package_io/utils.star")
 
 
 def launch_l2(
@@ -51,8 +51,8 @@ def launch_l2(
         all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
 
-    network_id_as_hex = util.to_hex_chain_id(network_params.network_id)
-    l1_bridge_address = util.read_network_config_value(
+    network_id_as_hex = utils.to_hex_chain_id(network_params.network_id)
+    l1_bridge_address = utils.read_network_config_value(
         plan,
         deployment_output,
         "state",
@@ -64,7 +64,7 @@ def launch_l2(
     for additional_service in l2_args.additional_services:
         if additional_service == "blockscout":
             plan.print("Launching op-blockscout")
-            blockscout.launch_blockscout(
+            blockscout.launch(
                 plan,
                 l2_services_suffix,
                 l1_bootnode_context,  # first l1 EL url
@@ -77,7 +77,7 @@ def launch_l2(
 
     plan.print(all_l2_participants)
     plan.print(
-        "Begin your L2 adventures by depositing some L1 Kurtosis ETH to: {0}".format(
+        "Begin your L2 adventures by depositing some L1 Kurtosis ETH to bridge address: {0}".format(
             l1_bridge_address
         )
     )

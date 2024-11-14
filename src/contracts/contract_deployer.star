@@ -1,4 +1,4 @@
-utils = import_module("../util.star")
+utils = import_module("../package_io/utils.star")
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"

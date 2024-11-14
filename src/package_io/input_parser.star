@@ -170,6 +170,21 @@ def parse_network_params(plan, input_args):
 
     return results
 
+# TODO: refactor
+def get_client_log_level_or_default(
+    participant_log_level, global_log_level, client_log_levels
+):
+    log_level = client_log_levels.get(participant_log_level, "")
+    if log_level == "":
+        log_level = client_log_levels.get(global_log_level, "")
+        if log_level == "":
+            fail(
+                "No participant log level defined, and the client log level has no mapping for global log level '{0}'".format(
+                    global_log_level
+                )
+            )
+    return log_level
+
 def get_client_node_selectors(participant_node_selectors, global_node_selectors):
     node_selectors = {}
     node_selectors = participant_node_selectors if participant_node_selectors else {}

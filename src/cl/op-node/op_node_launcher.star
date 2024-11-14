@@ -1,7 +1,3 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
-)
-
 ethereum_package_cl_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
 )
@@ -10,13 +6,9 @@ ethereum_package_constants = import_module(
     "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
 )
 
-ethereum_package_input_parser = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
-)
-
-constants = import_module("../../package_io/constants.star")
-
-util = import_module("../../util.star")
+constants    = import_module("../../package_io/constants.star")
+input_parser = import_module("../../package_io/input_parser.star")
+utils        = import_module("../../package_io/utils.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -34,16 +26,16 @@ BEACON_HTTP_PORT_NUM = 8547
 
 def get_used_ports(discovery_port):
     used_ports = {
-        BEACON_TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            discovery_port, ethereum_package_shared_utils.TCP_PROTOCOL, wait=None
+        BEACON_TCP_DISCOVERY_PORT_ID: utils.new_port_spec(
+            discovery_port, utils.TCP_PROTOCOL, wait=None
         ),
-        BEACON_UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            discovery_port, ethereum_package_shared_utils.UDP_PROTOCOL, wait=None
+        BEACON_UDP_DISCOVERY_PORT_ID: utils.new_port_spec(
+            discovery_port, utils.UDP_PROTOCOL, wait=None
         ),
-        BEACON_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        BEACON_HTTP_PORT_ID: utils.new_port_spec(
             BEACON_HTTP_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+            utils.TCP_PROTOCOL,
+            utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return used_ports
@@ -86,7 +78,7 @@ def launch(
         },
     )
 
-    log_level = ethereum_package_input_parser.get_client_log_level_or_default(
+    log_level = input_parser.get_client_log_level_or_default(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
@@ -180,7 +172,7 @@ def get_beacon_config(
         "--p2p.listen.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
     ]
 
-    sequencer_private_key = util.read_network_config_value(
+    sequencer_private_key = utils.read_network_config_value(
         plan,
         launcher.deployment_output,
         "sequencer-{0}".format(launcher.network_params.network_id),
@@ -233,7 +225,7 @@ def get_beacon_config(
         "files": files,
         "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
-        "labels": ethereum_package_shared_utils.label_maker(
+        "labels": utils.label_maker(
             client=constants.CL_TYPE.op_node,
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image,

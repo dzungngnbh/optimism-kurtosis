@@ -1,48 +1,43 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
-)
-
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
+utils    = import_module("../package_io/utils.star")
 
-util = import_module("../util.star")
-
-IMAGE_NAME_BLOCKSCOUT = "blockscout/blockscout-optimism:6.8.0"
+IMAGE_NAME_BLOCKSCOUT       = "blockscout/blockscout-optimism:6.8.0"
 IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
 
 SERVICE_NAME_BLOCKSCOUT = "op-blockscout"
 
-HTTP_PORT_ID = "http"
-HTTP_PORT_NUMBER = 4000
-HTTP_PORT_NUMBER_VERIF = 8050
+HTTP_PORT_ID                = "http"
+HTTP_PORT_NUMBER            = 4000
+HTTP_PORT_NUMBER_VERIF      = 8050
 
-BLOCKSCOUT_MIN_CPU = 100
-BLOCKSCOUT_MAX_CPU = 1000
-BLOCKSCOUT_MIN_MEMORY = 1024
-BLOCKSCOUT_MAX_MEMORY = 2048
+BLOCKSCOUT_MIN_CPU          = 100
+BLOCKSCOUT_MAX_CPU          = 1000
+BLOCKSCOUT_MIN_MEMORY       = 1024
+BLOCKSCOUT_MAX_MEMORY       = 2048
 
-BLOCKSCOUT_VERIF_MIN_CPU = 10
-BLOCKSCOUT_VERIF_MAX_CPU = 1000
+BLOCKSCOUT_VERIF_MIN_CPU    = 10
+BLOCKSCOUT_VERIF_MAX_CPU    = 1000
 BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
 
-USED_PORTS = {
-    HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+ports = {
+    HTTP_PORT_ID: utils.new_port_spec(
         HTTP_PORT_NUMBER,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+        utils.TCP_PROTOCOL,
+        utils.HTTP_APPLICATION_PROTOCOL,
     )
 }
 
-VERIF_USED_PORTS = {
-    HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+VERIF_ports = {
+    HTTP_PORT_ID: utils.new_port_spec(
         HTTP_PORT_NUMBER_VERIF,
-        ethereum_package_shared_utils.TCP_PROTOCOL,
-        ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+        utils.TCP_PROTOCOL,
+        utils.HTTP_APPLICATION_PROTOCOL,
     )
 }
 
 
-def launch_blockscout(
+def launch(
     plan,
     l2_services_suffix,
     l1_el_context,
@@ -52,10 +47,10 @@ def launch_blockscout(
     network_id,
 ):
     rollup_filename = "rollup-{0}".format(network_id)
-    portal_address = util.read_network_config_value(
+    portal_address = utils.read_network_config_value(
         plan, deployment_output, rollup_filename, ".deposit_contract_address"
     )
-    l1_deposit_start_block = util.read_network_config_value(
+    l1_deposit_start_block = utils.read_network_config_value(
         plan, deployment_output, rollup_filename, ".genesis.l1.number"
     )
 
@@ -68,7 +63,7 @@ def launch_blockscout(
         extra_configs=["max_connections=1000"],
     )
 
-    config_verif = get_config_verif()
+    config_verif = get_verif_config()
     verif_service_name = "{0}-verif{1}".format(
         SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
     )
@@ -77,7 +72,7 @@ def launch_blockscout(
         verif_service.hostname, verif_service.ports["http"].number
     )
 
-    config_backend = get_config_backend(
+    config_backend = get_backend_config(
         postgres_output,
         l1_el_context,
         l2_el_context,
@@ -104,10 +99,10 @@ def launch_blockscout(
     return blockscout_url
 
 
-def get_config_verif():
+def get_verif_config():
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT_VERIF,
-        ports=VERIF_USED_PORTS,
+        ports=VERIF_ports,
         env_vars={
             "SMART_CONTRACT_VERIFIER__SERVER__HTTP__ADDR": "0.0.0.0:{}".format(
                 HTTP_PORT_NUMBER_VERIF
@@ -120,7 +115,7 @@ def get_config_verif():
     )
 
 
-def get_config_backend(
+def get_backend_config(
     postgres_output,
     l1_el_context,
     l2_el_context,
@@ -158,7 +153,7 @@ def get_config_backend(
 
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT,
-        ports=USED_PORTS,
+        ports=ports,
         cmd=[
             "/bin/sh",
             "-c",
@@ -186,4 +181,4 @@ def get_config_backend(
         max_cpu=BLOCKSCOUT_MAX_CPU,
         min_memory=BLOCKSCOUT_MIN_MEMORY,
         max_memory=BLOCKSCOUT_MAX_MEMORY,
-    )
+    ) 

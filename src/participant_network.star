@@ -1,10 +1,8 @@
 el_cl_client_launcher = import_module("./el_cl_launcher.star")
 input_parser          = import_module("./package_io/input_parser.star")
+utils                 = import_module("./package_io/utils.star")
 op_batcher_launcher   = import_module("./batcher/op-batcher/op_batcher_launcher.star")
 op_proposer_launcher  = import_module("./proposer/op-proposer/op_proposer_launcher.star")
-participant_module    = import_module("./participant.star")
-util                  = import_module("./util.star")
-
 
 def launch_participant_network(
     plan,
@@ -45,22 +43,22 @@ def launch_participant_network(
         el_context = all_el_contexts[index]
         cl_context = all_cl_contexts[index]
 
-        participant_entry = participant_module.new_participant(
-            el_type,
-            cl_type,
-            el_context,
-            cl_context,
+        participant_entry = struct(
+            el_type = el_type,
+            cl_type = cl_type,
+            el_context = el_context,
+            cl_context = cl_context,
         )
 
         all_participants.append(participant_entry)
 
-    proposer_key = util.read_network_config_value(
+    proposer_key = utils.read_network_config_value(
         plan,
         deployment_output,
         "proposer-{0}".format(network_params.network_id),
         ".privateKey",
     )
-    batcher_key = util.read_network_config_value(
+    batcher_key = utils.read_network_config_value(
         plan,
         deployment_output,
         "batcher-{0}".format(network_params.network_id),

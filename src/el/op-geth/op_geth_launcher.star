@@ -1,7 +1,3 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
-)
-
 ethereum_package_el_context = import_module(
     "github.com/ethpandaops/ethereum-package/src/el/el_context.star"
 )
@@ -22,25 +18,26 @@ ethereum_package_constants = import_module(
 )
 
 constants = import_module("../../package_io/constants.star")
+utils     = import_module("../../package_io/utils.star")
 
-RPC_PORT_NUM = 8545
-WS_PORT_NUM = 8546
-DISCOVERY_PORT_NUM = 30303
-ENGINE_RPC_PORT_NUM = 8551
-METRICS_PORT_NUM = 9001
+RPC_PORT_NUM         = 8545
+WS_PORT_NUM          = 8546
+DISCOVERY_PORT_NUM   = 30303
+ENGINE_RPC_PORT_NUM  = 8551
+METRICS_PORT_NUM     = 9001
 
 # The min/max CPU/memory that the execution node can use
-EXECUTION_MIN_CPU = 300
+EXECUTION_MIN_CPU    = 300
 EXECUTION_MIN_MEMORY = 512
 
 # Port IDs
-RPC_PORT_ID = "rpc"
-WS_PORT_ID = "ws"
+RPC_PORT_ID           = "rpc"
+WS_PORT_ID            = "ws"
 TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 UDP_DISCOVERY_PORT_ID = "udp-discovery"
-ENGINE_RPC_PORT_ID = "engine-rpc"
-ENGINE_WS_PORT_ID = "engineWs"
-METRICS_PORT_ID = "metrics"
+ENGINE_RPC_PORT_ID    = "engine-rpc"
+ENGINE_WS_PORT_ID     = "engineWs"
+METRICS_PORT_ID       = "metrics"
 
 # TODO(old) Scale this dynamically based on CPUs available and Geth nodes mining
 NUM_MINING_THREADS = 1
@@ -50,29 +47,28 @@ METRICS_PATH = "/debug/metrics/prometheus"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
-
 def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
     used_ports = {
-        RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        RPC_PORT_ID: utils.new_port_spec(
             RPC_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+            utils.TCP_PROTOCOL,
+            utils.HTTP_APPLICATION_PROTOCOL,
         ),
-        WS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            WS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
+        WS_PORT_ID: utils.new_port_spec(
+            WS_PORT_NUM, utils.TCP_PROTOCOL
         ),
-        TCP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            discovery_port, ethereum_package_shared_utils.TCP_PROTOCOL
+        TCP_DISCOVERY_PORT_ID: utils.new_port_spec(
+            discovery_port, utils.TCP_PROTOCOL
         ),
-        UDP_DISCOVERY_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            discovery_port, ethereum_package_shared_utils.UDP_PROTOCOL
+        UDP_DISCOVERY_PORT_ID: utils.new_port_spec(
+            discovery_port, utils.UDP_PROTOCOL
         ),
-        ENGINE_RPC_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        ENGINE_RPC_PORT_ID: utils.new_port_spec(
             ENGINE_RPC_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
+            utils.TCP_PROTOCOL,
         ),
-        METRICS_PORT_ID: ethereum_package_shared_utils.new_port_spec(
-            METRICS_PORT_NUM, ethereum_package_shared_utils.TCP_PROTOCOL
+        METRICS_PORT_ID: utils.new_port_spec(
+            METRICS_PORT_NUM, utils.TCP_PROTOCOL
         ),
     }
     return used_ports
@@ -259,7 +255,7 @@ def get_config(
         "entrypoint": ENTRYPOINT_ARGS,
         "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
-        "labels": ethereum_package_shared_utils.label_maker(
+        "labels": utils.label_maker(
             client=constants.EL_TYPE.op_geth,
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image,
