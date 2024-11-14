@@ -12,9 +12,7 @@ BATCHER_HTTP_PORT_NUM = 8548
 def get_ports():
     ports = {
         BATCHER_HTTP_PORT_ID: utils.new_port_spec(
-            BATCHER_HTTP_PORT_NUM,
-            utils.TCP_PROTOCOL,
-            utils.HTTP_APPLICATION_PROTOCOL,
+            number=BATCHER_HTTP_PORT_NUM
         ),
     }
     return ports
