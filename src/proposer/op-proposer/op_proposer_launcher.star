@@ -13,20 +13,17 @@ PROPOSER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-proposer/op-proposer-data
 
 # Port IDs
 PROPOSER_HTTP_PORT_ID = "http"
-
-# Port nums
 PROPOSER_HTTP_PORT_NUM = 8560
 
-
-def get_used_ports():
-    used_ports = {
+def get_ports():
+    ports = {
         PROPOSER_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
             PROPOSER_HTTP_PORT_NUM,
             ethereum_package_shared_utils.TCP_PROTOCOL,
             ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
-    return used_ports
+    return ports
 
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
@@ -82,7 +79,7 @@ def get_proposer_config(
         "--l1-eth-rpc=" + l1_config_env_vars["L1_RPC_URL"],
     ]
 
-    ports = get_used_ports()
+    ports = get_ports()
     return ServiceConfig(
         image=image,
         ports=ports,
