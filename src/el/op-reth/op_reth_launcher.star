@@ -32,7 +32,6 @@ METRICS_PATH = "/metrics"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/op-reth/execution-data"
 
-
 def get_ports(discovery_port=DISCOVERY_PORT_NUM):
     ports = {
         RPC_PORT_ID: utils.new_port_spec(
@@ -44,10 +43,10 @@ def get_ports(discovery_port=DISCOVERY_PORT_NUM):
             WS_PORT_NUM, utils.TCP_PROTOCOL
         ),
         TCP_DISCOVERY_PORT_ID: utils.new_port_spec(
-            discovery_port, utils.TCP_PROTOCOL
+            DISCOVERY_PORT_NUM, utils.TCP_PROTOCOL
         ),
         UDP_DISCOVERY_PORT_ID: utils.new_port_spec(
-            discovery_port, utils.UDP_PROTOCOL
+            DISCOVERY_PORT_NUM, utils.UDP_PROTOCOL
         ),
         ENGINE_RPC_PORT_ID: utils.new_port_spec(
             ENGINE_RPC_PORT_NUM, utils.TCP_PROTOCOL
@@ -68,7 +67,7 @@ VERBOSITY_LEVELS = {
 }
 
 
-def launch(
+def run(
     plan,
     launcher,
     service_name,

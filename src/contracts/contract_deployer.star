@@ -1,28 +1,24 @@
 utils = import_module("../common/utils.star")
 
-ENVRC_PATH = "/workspace/optimism/.envrc"
-FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
-FACTORY_DEPLOYER_ADDRESS = "0x3fAB184622Dc19b6109349B94811493BF2a45362"
-# Create2Factory contract raw code to deployt to L1
-FACTORY_DEPLOYER_CODE = "0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222"
 FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 
-# Deploy contracts
+# Deploy L2 contracts
 def deploy_contracts(
     plan,
     private_key,
-    l1_config_env_vars,
+    l1_env_vars,
     optimism_args,
 ):
     l2_chain_ids = ",".join(
         [str(chain.network_params.network_id) for chain in optimism_args.chains]
     )
 
+    # op-deployer init to create intent.toml file in /network-data folder
     op_deployer_init = plan.run_sh(
         name="op-deployer-init",
         description="Initialize L2 contract deployments",
         image=optimism_args.op_contract_deployer_params.image,
-        env_vars=l1_config_env_vars,
+        env_vars=l1_env_vars,
         store=[
             StoreSpec(
                 src="/network-data",
@@ -39,6 +35,7 @@ def deploy_contracts(
         ),
     )
 
+    # update intent with funding dev accounts and block time
     intent_updates = (
         [
             (
@@ -88,6 +85,7 @@ def deploy_contracts(
         ),
     )
 
+    # apply op-deployer contract with settings
     cmds = [
         "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data",
     ]
@@ -108,7 +106,7 @@ def deploy_contracts(
         name="op-deployer-apply",
         description="Apply L2 contract deployments",
         image=optimism_args.op_contract_deployer_params.image,
-        env_vars={"PRIVATE_KEY": str(private_key)} | l1_config_env_vars,
+        env_vars={"PRIVATE_KEY": str(private_key)} | l1_env_vars,
         store=[
             StoreSpec(
                 src="/network-data",
@@ -121,6 +119,7 @@ def deploy_contracts(
         run=" && ".join(cmds),
     )
 
+    # fund dev accounts
     fund_script_artifact = plan.upload_files(
         src=FUND_SCRIPT_FILEPATH,
         name="op-deployer-fund-script",
@@ -131,7 +130,7 @@ def deploy_contracts(
         description="Collect keys, and fund addresses",
         image=utils.DEPLOYMENT_UTILS_IMAGE,
         env_vars={"PRIVATE_KEY": str(private_key), "FUND_VALUE": "10ether"}
-        | l1_config_env_vars,
+                 | l1_env_vars,
         store=[
             StoreSpec(
                 src="/network-data",

@@ -6,13 +6,13 @@ utils = import_module("./common/utils.star")
 
 JWT_PATH_FILEPATH = "/static_files/jwt/jwtsecret"
 
-def launch_l2(
+def run(
     plan,
     l2_services_suffix,
     l2_args,
     deployment_output,
     l1_config,
-    l1_priv_key,
+    l1_private_key,
     l1_bootnode_context,
     global_log_level,
     global_node_selectors,
@@ -62,7 +62,7 @@ def launch_l2(
     for additional_service in l2_args.additional_services:
         if additional_service == "blockscout":
             plan.print("Launching op-blockscout")
-            blockscout.launch(
+            blockscout.run(
                 plan,
                 l2_services_suffix,
                 l1_bootnode_context,  # first l1 EL url

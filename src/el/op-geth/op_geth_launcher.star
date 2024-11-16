@@ -74,7 +74,7 @@ BUILDER_IMAGE_STR = "builder"
 SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
 
 
-def launch(
+def run(
     plan,
     launcher,
     service_name,

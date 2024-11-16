@@ -20,9 +20,9 @@ send() {
 }
 
 for chain_id in "${chain_ids[@]}"; do
-  proposer_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/1")
-  proposer_addr=$(cast wallet address "$proposer_priv")
-  write_keyfile "$proposer_addr" "$proposer_priv" "proposer-$chain_id"
+#  proposer_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/1")
+#  proposer_addr=$(cast wallet address "$proposer_priv")
+#  write_keyfile "$proposer_addr" "$proposer_priv" "proposer-$chain_id"
   batcher_priv=$(cast wallet private-key "$mnemonic" "m/44'/60'/2'/$chain_id/2")
   batcher_addr=$(cast wallet address "$batcher_priv")
   write_keyfile "$batcher_addr" "$batcher_priv" "batcher-$chain_id"

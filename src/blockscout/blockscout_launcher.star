@@ -19,7 +19,7 @@ BLOCKSCOUT_VERIF_MAX_CPU    = 1000
 BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
 
-ports = {
+PORTS = {
     "http": utils.new_port_spec(
         HTTP_PORT_NUMBER,
     )
@@ -32,7 +32,7 @@ VERIF_ports = {
 }
 
 
-def launch(
+def run(
     plan,
     l2_services_suffix,
     l1_el_context,
@@ -148,7 +148,7 @@ def get_backend_config(
 
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT,
-        ports=ports,
+        ports=PORTS,
         cmd=[
             "/bin/sh",
             "-c",

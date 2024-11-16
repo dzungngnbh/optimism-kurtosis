@@ -8,8 +8,7 @@ op_reth = import_module("./el/op-reth/op_reth_launcher.star")
 # CL
 op_node = import_module("./cl/op-node/op_node_launcher.star")
 
-
-def launch(
+def run(
     plan,
     jwt_file,
     network_params,
@@ -31,7 +30,7 @@ def launch(
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": op_geth.launch,
+            "launch_method": op_geth.run,
         },
         "op-reth": {
             "launcher": op_reth.new_op_reth_launcher(
@@ -40,7 +39,7 @@ def launch(
                 network_params.network,
                 network_params.network_id,
             ),
-            "launch_method": op_reth.launch,
+            "launch_method": op_reth.run,
         },
     }
 
@@ -49,7 +48,7 @@ def launch(
             "launcher": op_node.new_op_node_launcher(
                 deployment_output, jwt_file, network_params
             ),
-            "launch_method": op_node.launch,
+            "launch_method": op_node.run,
         },
     }
 

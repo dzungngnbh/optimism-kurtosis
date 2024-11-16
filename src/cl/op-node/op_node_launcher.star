@@ -45,7 +45,7 @@ VERBOSITY_LEVELS = {
 }
 
 
-def launch(
+def run(
     plan,
     launcher,
     service_name,

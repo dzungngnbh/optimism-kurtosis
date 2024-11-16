@@ -6,18 +6,13 @@ BATCHER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-batcher/op-batcher-data"
 BATCHER_HTTP_PORT_ID  = "http"
 BATCHER_HTTP_PORT_NUM = 8548
 
-def get_ports():
-    ports = {
-        BATCHER_HTTP_PORT_ID: utils.new_port_spec(
-            number=BATCHER_HTTP_PORT_NUM
-        ),
-    }
-    return ports
+PORTS = {
+    BATCHER_HTTP_PORT_ID: utils.new_port_spec(
+        number=BATCHER_HTTP_PORT_NUM
+    ),
+}
 
-
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
-def launch(
+def run(
     plan,
     service_name,
     image,
@@ -77,10 +72,9 @@ def get_config(
 
     cmd += batcher_params.extra_params
 
-    ports = get_ports()
     return ServiceConfig(
         image=image,
-        ports=ports,
+        ports=PORTS,
         cmd=cmd,
         private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

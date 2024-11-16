@@ -2,7 +2,6 @@ el_cl_client_launcher = import_module("./el_cl_launcher.star")
 input_parser          = import_module("./common/input_parser.star")
 utils                 = import_module("./common/utils.star")
 op_batcher_launcher   = import_module("./batcher/op-batcher/op_batcher_launcher.star")
-op_proposer_launcher  = import_module("./proposer/op-proposer/op_proposer_launcher.star")
 
 def launch_participant_network(
     plan,
@@ -20,7 +19,7 @@ def launch_participant_network(
 ):
     num_participants = len(participants)
     # First EL and sequencer CL
-    all_el_contexts, all_cl_contexts = el_cl_client_launcher.launch(
+    all_el_contexts, all_cl_contexts = el_cl_client_launcher.run(
         plan,
         jwt_file,
         network_params,
@@ -71,7 +70,7 @@ def launch_participant_network(
         else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
     )
 
-    op_batcher_launcher.launch(
+    op_batcher_launcher.run(
         plan,
         "op-batcher-{0}".format(l2_services_suffix),
         op_batcher_image,
