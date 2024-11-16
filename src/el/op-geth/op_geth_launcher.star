@@ -1,15 +1,10 @@
-ethereum_package_el_admin_node_info = import_module(
-    "github.com/ethpandaops/ethereum-package/src/el/el_admin_node_info.star"
-)
-
-ethereum_package_node_metrics = import_module(
-    "github.com/ethpandaops/ethereum-package/src/node_metrics_info.star"
-)
+el_context = import_module("../../el/el_context.star")
+el_admin_node_info = import_module("../../el/el_admin_node_info.star")
 
 constants = import_module("../../common/constants.star")
-utils     = import_module("../../common/utils.star")
-el_context = import_module("../../el/el_context.star")
 input_parser = import_module("../../common/input_parser.star")
+node_metrics_info = import_module("../../common/node_metrics_info.star")
+utils     = import_module("../../common/utils.star")
 
 RPC_PORT_NUM         = 8545
 WS_PORT_NUM          = 8546
@@ -115,18 +110,18 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode, enr = ethereum_package_el_admin_node_info.get_enode_enr_for_node(
+    enode, enr = el_admin_node_info.get_enode_enr_for_node(
         plan, service_name, RPC_PORT_ID
     )
 
     metrics_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    geth_metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
+    geth_metrics_info = node_metrics_info.new(
         service_name, METRICS_PATH, metrics_url
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
-    return el_context.new_el_context(
+    return el_context.new(
         client_name="op-geth",
         enode=enode,
         ip_addr=service.ip_address,

@@ -1,15 +1,12 @@
-ethereum_package_el_admin_node_info = import_module(
+el_admin_node_info = import_module(
     "github.com/ethpandaops/ethereum-package/src/el/el_admin_node_info.star"
-)
-
-ethereum_package_node_metrics = import_module(
-    "github.com/ethpandaops/ethereum-package/src/node_metrics_info.star"
 )
 
 constants = import_module("../../common/constants.star")
 utils = import_module("../../common/utils.star")
 input_parser = import_module("../../common/input_parser.star")
 el_context = import_module("../../el/el_context.star")
+node_metrics_info = import_module("../../common/node_metrics_info.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -107,18 +104,18 @@ def launch(
 
     service = plan.add_service(service_name, config)
 
-    enode = ethereum_package_el_admin_node_info.get_enode_for_node(
+    enode = el_admin_node_info.get_enode_for_node(
         plan, service_name, RPC_PORT_ID
     )
 
     metric_url = "{0}:{1}".format(service.ip_address, METRICS_PORT_NUM)
-    op_reth_metrics_info = ethereum_package_node_metrics.new_node_metrics_info(
+    op_reth_metrics_info = node_metrics_info.new(
         service_name, METRICS_PATH, metric_url
     )
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
-    return el_context.new_el_context(
+    return el_context.new(
         client_name="reth",
         enode=enode,
         ip_addr=service.ip_address,

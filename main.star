@@ -1,5 +1,6 @@
-contract_deployer = import_module("./src/contracts/contract_deployer.star")
 ethereum_package = import_module("github.com/ethpandaops/ethereum-package/main.star")
+
+contract_deployer = import_module("./src/contracts/contract_deployer.star")
 input_parser = import_module("./src/common/input_parser.star")
 l2_launcher = import_module("./src/l2.star")
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
