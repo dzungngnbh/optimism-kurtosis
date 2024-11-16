@@ -47,3 +47,6 @@ def to_hex_chain_id(chain_id):
     out = "%x" % int(chain_id)
     pad = 64 - len(out)
     return "0x" + "0" * pad + out
+
+def zfill_custom(value, width):
+    return ("0" * (width - len(str(value)))) + str(value)

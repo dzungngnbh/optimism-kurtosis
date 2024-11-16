@@ -1,9 +1,6 @@
-utils     = import_module("../../package_io/utils.star")
-constants = import_module("../../package_io/constants.star")
+utils     = import_module("../../common/utils.star")
+constants = import_module("../../common/constants.star")
 
-#
-#  ---------------------------------- Batcher client -------------------------------------
-# The Docker container runs as the "op-batcher" user so we can't write to root
 BATCHER_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-batcher/op-batcher-data"
 
 BATCHER_HTTP_PORT_ID  = "http"
@@ -30,7 +27,7 @@ def launch(
     gs_batcher_private_key,
     batcher_params,
 ):
-    config = get_batcher_config(
+    config = get_config(
         plan,
         image,
         service_name,
@@ -48,10 +45,9 @@ def launch(
         batcher_service.ip_address, batcher_http_port.number
     )
 
-    return "op_batcher"
+    return batcher_http_url
 
-
-def get_batcher_config(
+def get_config(
     plan,
     image,
     service_name,

@@ -1,6 +1,6 @@
 el_cl_client_launcher = import_module("./el_cl_launcher.star")
-input_parser          = import_module("./package_io/input_parser.star")
-utils                 = import_module("./package_io/utils.star")
+input_parser          = import_module("./common/input_parser.star")
+utils                 = import_module("./common/utils.star")
 op_batcher_launcher   = import_module("./batcher/op-batcher/op_batcher_launcher.star")
 op_proposer_launcher  = import_module("./proposer/op-proposer/op_proposer_launcher.star")
 
@@ -81,5 +81,9 @@ def launch_participant_network(
         batcher_key,
         batcher_params,
     )
+
+    # proxyd
+    proxyd_image = { 
+    }
 
     return all_participants

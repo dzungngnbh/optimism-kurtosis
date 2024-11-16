@@ -1,4 +1,4 @@
-utils = import_module("../package_io/utils.star")
+utils = import_module("../common/utils.star")
 
 ENVRC_PATH = "/workspace/optimism/.envrc"
 FACTORY_ADDRESS = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
@@ -10,7 +10,7 @@ FUND_SCRIPT_FILEPATH = "../../static_files/scripts"
 # Deploy contracts
 def deploy_contracts(
     plan,
-    priv_key,
+    private_key,
     l1_config_env_vars,
     optimism_args,
 ):
@@ -88,12 +88,12 @@ def deploy_contracts(
         ),
     )
 
-    apply_cmds = [
+    cmds = [
         "op-deployer apply --l1-rpc-url $L1_RPC_URL --private-key $PRIVATE_KEY --workdir /network-data",
     ]
     for chain in optimism_args.chains:
         network_id = chain.network_params.network_id
-        apply_cmds.extend(
+        cmds.extend(
             [
                 "op-deployer inspect genesis --workdir /network-data --outfile /network-data/genesis-{0}.json {0}".format(
                     network_id
@@ -108,7 +108,7 @@ def deploy_contracts(
         name="op-deployer-apply",
         description="Apply L2 contract deployments",
         image=optimism_args.op_contract_deployer_params.image,
-        env_vars={"PRIVATE_KEY": str(priv_key)} | l1_config_env_vars,
+        env_vars={"PRIVATE_KEY": str(private_key)} | l1_config_env_vars,
         store=[
             StoreSpec(
                 src="/network-data",
@@ -118,7 +118,7 @@ def deploy_contracts(
         files={
             "/network-data": op_deployer_configure.files_artifacts[0],
         },
-        run=" && ".join(apply_cmds),
+        run=" && ".join(cmds),
     )
 
     fund_script_artifact = plan.upload_files(
@@ -130,7 +130,7 @@ def deploy_contracts(
         name="op-deployer-fund",
         description="Collect keys, and fund addresses",
         image=utils.DEPLOYMENT_UTILS_IMAGE,
-        env_vars={"PRIVATE_KEY": str(priv_key), "FUND_VALUE": "10ether"}
+        env_vars={"PRIVATE_KEY": str(private_key), "FUND_VALUE": "10ether"}
         | l1_config_env_vars,
         store=[
             StoreSpec(

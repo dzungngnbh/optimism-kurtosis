@@ -20,7 +20,7 @@ DEFAULT_PROPOSER_IMAGES = {
 
 DEFAULT_ADDITIONAL_SERVICES = ["blockscout"]
 
-
+# parse network_params.yaml input file
 def input_parser(plan, input_args):
     # validate input_args
     sanity_check.sanity_check(plan, input_args)

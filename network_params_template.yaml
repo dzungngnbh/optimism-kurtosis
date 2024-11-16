@@ -44,7 +44,7 @@ optimism_package:
 
         # Persistent storage size for the EL client container (in MB)
         # Defaults to 0, which means that the default size for the client will be used
-        # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+        # Default values can be found in /src/common/constants.star VOLUME_SIZE
         el_volume_size: 0
 
         # Resource management for el containers
@@ -99,7 +99,7 @@ optimism_package:
 
         # Persistent storage size for the CL client container (in MB)
         # Defaults to 0, which means that the default size for the client will be used
-        # Default values can be found in /src/package_io/constants.star VOLUME_SIZE
+        # Default values can be found in /src/common/constants.star VOLUME_SIZE
         cl_volume_size: 0
 
         # Resource management for cl containers

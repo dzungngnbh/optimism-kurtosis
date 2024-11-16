@@ -1,12 +1,10 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
-)
-
-input_parser = import_module("./package_io/input_parser.star")
+input_parser = import_module("./common/input_parser.star")
+utils = import_module("./common/utils.star")
 
 # EL
 op_geth = import_module("./el/op-geth/op_geth_launcher.star")
 op_reth = import_module("./el/op-reth/op_reth_launcher.star")
+
 # CL
 op_node = import_module("./cl/op-node/op_node_launcher.star")
 
@@ -99,7 +97,7 @@ def launch(
         )
 
         # Zero-pad the index using the calculated zfill value
-        index_str = ethereum_package_shared_utils.zfill_custom(
+        index_str = utils.zfill_custom(
             index + 1, len(str(len(participants)))
         )
 

@@ -1,12 +1,11 @@
 postgres = import_module("github.com/kurtosis-tech/postgres-package/main.star")
-utils    = import_module("../package_io/utils.star")
+utils    = import_module("../common/utils.star")
 
 IMAGE_NAME_BLOCKSCOUT       = "blockscout/blockscout-optimism:6.8.0"
 IMAGE_NAME_BLOCKSCOUT_VERIF = "ghcr.io/blockscout/smart-contract-verifier:v1.9.0"
 
 SERVICE_NAME_BLOCKSCOUT = "op-blockscout"
 
-HTTP_PORT_ID                = "http"
 HTTP_PORT_NUMBER            = 4000
 HTTP_PORT_NUMBER_VERIF      = 8050
 
@@ -21,18 +20,14 @@ BLOCKSCOUT_VERIF_MIN_MEMORY = 10
 BLOCKSCOUT_VERIF_MAX_MEMORY = 1024
 
 ports = {
-    HTTP_PORT_ID: utils.new_port_spec(
+    "http": utils.new_port_spec(
         HTTP_PORT_NUMBER,
-        utils.TCP_PROTOCOL,
-        utils.HTTP_APPLICATION_PROTOCOL,
     )
 }
 
 VERIF_ports = {
-    HTTP_PORT_ID: utils.new_port_spec(
+    "http": utils.new_port_spec(
         HTTP_PORT_NUMBER_VERIF,
-        utils.TCP_PROTOCOL,
-        utils.HTTP_APPLICATION_PROTOCOL,
     )
 }
 
@@ -63,20 +58,20 @@ def launch(
         extra_configs=["max_connections=1000"],
     )
 
-    config_verif = get_verif_config()
-    verif_service_name = "{0}-verif{1}".format(
+    config_verifier = get_verifier_config()
+    verifier_service_name = "{0}-verif{1}".format(
         SERVICE_NAME_BLOCKSCOUT, l2_services_suffix
     )
-    verif_service = plan.add_service(verif_service_name, config_verif)
-    verif_url = "http://{}:{}".format(
-        verif_service.hostname, verif_service.ports["http"].number
+    verifier_service = plan.add_service(verifier_service_name, config_verifier)
+    verifier_url = "http://{}:{}".format(
+        verifier_service.hostname, verifier_service.ports["http"].number
     )
 
-    config_backend = get_backend_config(
+    backend_config = get_backend_config(
         postgres_output,
         l1_el_context,
         l2_el_context,
-        verif_url,
+        verifier_url,
         l2_network_name,
         {
             "INDEXER_OPTIMISM_L1_PORTAL_CONTRACT": portal_address,
@@ -88,7 +83,7 @@ def launch(
         },
     )
     blockscout_service = plan.add_service(
-        "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_services_suffix), config_backend
+        "{0}{1}".format(SERVICE_NAME_BLOCKSCOUT, l2_services_suffix), backend_config
     )
     plan.print(blockscout_service)
 
@@ -99,7 +94,7 @@ def launch(
     return blockscout_url
 
 
-def get_verif_config():
+def get_verifier_config():
     return ServiceConfig(
         image=IMAGE_NAME_BLOCKSCOUT_VERIF,
         ports=VERIF_ports,

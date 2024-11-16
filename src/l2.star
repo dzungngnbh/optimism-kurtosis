@@ -1,11 +1,11 @@
 participant_network = import_module("./participant_network.star")
 blockscout = import_module("./blockscout/blockscout_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
-input_parser = import_module("./package_io/input_parser.star")
+input_parser = import_module("./common/input_parser.star")
 ethereum_package_static_files = import_module(
     "github.com/ethpandaops/ethereum-package/src/static_files/static_files.star"
 )
-utils = import_module("./package_io/utils.star")
+utils = import_module("./common/utils.star")
 
 
 def launch_l2(
@@ -30,7 +30,7 @@ def launch_l2(
         name="op_jwt_file{0}".format(l2_services_suffix),
     )
 
-    all_l2_participants = participant_network.launch_participant_network(
+    l2_participants = participant_network.launch_participant_network(
         plan,
         l2_args.participants,
         jwt_file,
@@ -47,7 +47,7 @@ def launch_l2(
 
     all_el_contexts = []
     all_cl_contexts = []
-    for participant in all_l2_participants:
+    for participant in l2_participants:
         all_el_contexts.append(participant.el_context)
         all_cl_contexts.append(participant.cl_context)
 
@@ -75,7 +75,7 @@ def launch_l2(
             )
             plan.print("Successfully launched op-blockscout")
 
-    plan.print(all_l2_participants)
+    plan.print(l2_participants)
     plan.print(
         "Begin your L2 adventures by depositing some L1 Kurtosis ETH to bridge address: {0}".format(
             l1_bridge_address

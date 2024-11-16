@@ -1,14 +1,7 @@
-ethereum_package_cl_context = import_module(
-    "github.com/ethpandaops/ethereum-package/src/cl/cl_context.star"
-)
-
-ethereum_package_constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
-)
-
-constants    = import_module("../../package_io/constants.star")
-input_parser = import_module("../../package_io/input_parser.star")
-utils        = import_module("../../package_io/utils.star")
+cl_context   = import_module("../cl_context.star")
+constants    = import_module("../../common/constants.star")
+input_parser = import_module("../../common/input_parser.star")
+utils        = import_module("../../common/utils.star")
 
 #  ---------------------------------- Beacon client -------------------------------------
 
@@ -44,11 +37,11 @@ def get_used_ports(discovery_port):
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "ERROR",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "WARN",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "INFO",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
+    constants.GLOBAL_LOG_LEVEL.error: "ERROR",
+    constants.GLOBAL_LOG_LEVEL.warn: "WARN",
+    constants.GLOBAL_LOG_LEVEL.info: "INFO",
+    constants.GLOBAL_LOG_LEVEL.debug: "DEBUG",
+    constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
 }
 
 
@@ -113,7 +106,7 @@ def launch(
     beacon_multiaddr = response["extract.multiaddr"]
     beacon_peer_id = response["extract.peer_id"]
 
-    return ethereum_package_cl_context.new_cl_context(
+    return cl_context.new_cl_context(
         client_name="op-node",
         enr=beacon_node_enr,
         ip_addr=beacon_service.ip_address,
@@ -151,10 +144,10 @@ def get_beacon_config(
     cmd = [
         "op-node",
         "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
-        "--l2.jwt-secret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--l2.jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--verifier.l1-confs=4",
         "--rollup.config="
-        + ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        + constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
         + "/rollup-{0}.json".format(launcher.network_params.network_id),
         "--rpc.addr=0.0.0.0",
         "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
@@ -164,7 +157,7 @@ def get_beacon_config(
         "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
         "--l1.trustrpc",
         "--p2p.advertise.ip="
-        + ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--p2p.advertise.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--p2p.advertise.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
         "--p2p.listen.ip=0.0.0.0",
@@ -191,7 +184,7 @@ def get_beacon_config(
                 [
                     ctx.enr
                     for ctx in existing_cl_clients[
-                        : ethereum_package_constants.MAX_ENR_ENTRIES
+                        : constants.MAX_ENR_ENTRIES
                     ]
                 ]
             )
@@ -200,8 +193,8 @@ def get_beacon_config(
     cmd += participant.cl_extra_params
 
     files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
 
     if persistent:
@@ -223,7 +216,7 @@ def get_beacon_config(
         "ports": ports,
         "cmd": cmd,
         "files": files,
-        "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": utils.label_maker(
             client=constants.CL_TYPE.op_node,

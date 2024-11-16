@@ -1,10 +1,5 @@
-ethereum_package_shared_utils = import_module(
-    "github.com/ethpandaops/ethereum-package/src/shared_utils/shared_utils.star"
-)
-
-ethereum_package_constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
-)
+constants = import_module("../../common/constants.star")
+utils = import_module("../../common/utils.star")
 
 #
 #  ---------------------------------- Batcher client -------------------------------------
@@ -17,17 +12,16 @@ PROPOSER_HTTP_PORT_NUM = 8560
 
 def get_ports():
     ports = {
-        PROPOSER_HTTP_PORT_ID: ethereum_package_shared_utils.new_port_spec(
+        PROPOSER_HTTP_PORT_ID: utils.new_port_spec(
             PROPOSER_HTTP_PORT_NUM,
-            ethereum_package_shared_utils.TCP_PROTOCOL,
-            ethereum_package_shared_utils.HTTP_APPLICATION_PROTOCOL,
+            utils.TCP_PROTOCOL,
+            utils.HTTP_APPLICATION_PROTOCOL,
         ),
     }
     return ports
 
 
 ENTRYPOINT_ARGS = ["sh", "-c"]
-
 
 def launch(
     plan,
@@ -38,8 +32,6 @@ def launch(
     gs_proposer_private_key,
     l2oo_address,
 ):
-    proposer_service_name = "{0}".format(service_name)
-
     config = get_proposer_config(
         plan,
         image,
@@ -51,13 +43,12 @@ def launch(
     )
 
     proposer_service = plan.add_service(service_name, config)
-
     proposer_http_port = proposer_service.ports[PROPOSER_HTTP_PORT_ID]
     proposer_http_url = "http://{0}:{1}".format(
         proposer_service.ip_address, proposer_http_port.number
     )
 
-    return "op_proposer"
+    return proposer_http_url
 
 
 def get_proposer_config(
@@ -84,5 +75,5 @@ def get_proposer_config(
         image=image,
         ports=ports,
         cmd=cmd,
-        private_ip_address_placeholder=ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
     )

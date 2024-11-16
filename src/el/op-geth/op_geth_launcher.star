@@ -1,6 +1,3 @@
-ethereum_package_el_context = import_module(
-    "github.com/ethpandaops/ethereum-package/src/el/el_context.star"
-)
 ethereum_package_el_admin_node_info = import_module(
     "github.com/ethpandaops/ethereum-package/src/el/el_admin_node_info.star"
 )
@@ -9,16 +6,10 @@ ethereum_package_node_metrics = import_module(
     "github.com/ethpandaops/ethereum-package/src/node_metrics_info.star"
 )
 
-ethereum_package_input_parser = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/input_parser.star"
-)
-
-ethereum_package_constants = import_module(
-    "github.com/ethpandaops/ethereum-package/src/package_io/constants.star"
-)
-
-constants = import_module("../../package_io/constants.star")
-utils     = import_module("../../package_io/utils.star")
+constants = import_module("../../common/constants.star")
+utils     = import_module("../../common/utils.star")
+el_context = import_module("../../el/el_context.star")
+input_parser = import_module("../../common/input_parser.star")
 
 RPC_PORT_NUM         = 8545
 WS_PORT_NUM          = 8546
@@ -77,11 +68,11 @@ def get_used_ports(discovery_port=DISCOVERY_PORT_NUM):
 ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.error: "1",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.warn: "2",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.info: "3",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.debug: "4",
-    ethereum_package_constants.GLOBAL_LOG_LEVEL.trace: "5",
+    constants.GLOBAL_LOG_LEVEL.error: "1",
+    constants.GLOBAL_LOG_LEVEL.warn: "2",
+    constants.GLOBAL_LOG_LEVEL.info: "3",
+    constants.GLOBAL_LOG_LEVEL.debug: "4",
+    constants.GLOBAL_LOG_LEVEL.trace: "5",
 }
 
 BUILDER_IMAGE_STR = "builder"
@@ -101,7 +92,7 @@ def launch(
     sequencer_enabled,
     sequencer_context,
 ):
-    log_level = ethereum_package_input_parser.get_client_log_level_or_default(
+    log_level = input_parser.get_client_log_level_or_default(
         participant.el_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
@@ -135,7 +126,7 @@ def launch(
 
     http_url = "http://{0}:{1}".format(service.ip_address, RPC_PORT_NUM)
 
-    return ethereum_package_el_context.new_el_context(
+    return el_context.new_el_context(
         client_name="op-geth",
         enode=enode,
         ip_addr=service.ip_address,
@@ -165,7 +156,7 @@ def get_config(
 ):
     init_datadir_cmd_str = "geth init --datadir={0} --state.scheme=hash {1}".format(
         EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER,
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
         + "/genesis-{0}.json".format(launcher.network_id),
     )
 
@@ -193,9 +184,9 @@ def get_config(
         "--authrpc.port={0}".format(ENGINE_RPC_PORT_NUM),
         "--authrpc.addr=0.0.0.0",
         "--authrpc.vhosts=*",
-        "--authrpc.jwtsecret=" + ethereum_package_constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--authrpc.jwtsecret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
         "--syncmode=full",
-        "--nat=extip:" + ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--nat=extip:" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "--rpc.allow-unprotected-txs",
         "--metrics",
         "--metrics.addr=0.0.0.0",
@@ -216,7 +207,7 @@ def get_config(
                 [
                     ctx.enode
                     for ctx in existing_el_clients[
-                        : ethereum_package_constants.MAX_ENODE_ENTRIES
+                        : constants.MAX_ENODE_ENTRIES
                     ]
                 ]
             )
@@ -224,7 +215,7 @@ def get_config(
 
     cmd += participant.el_extra_params
     cmd_str = " ".join(cmd)
-    if launcher.network not in ethereum_package_constants.PUBLIC_NETWORKS:
+    if launcher.network not in constants.PUBLIC_NETWORKS:
         subcommand_strs = [
             init_datadir_cmd_str,
             cmd_str,
@@ -234,8 +225,8 @@ def get_config(
         command_str = cmd_str
 
     files = {
-        ethereum_package_constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
-        ethereum_package_constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
+        constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
+        constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
     if persistent:
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
@@ -253,7 +244,7 @@ def get_config(
         "cmd": [command_str],
         "files": files,
         "entrypoint": ENTRYPOINT_ARGS,
-        "private_ip_address_placeholder": ethereum_package_constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": utils.label_maker(
             client=constants.EL_TYPE.op_geth,

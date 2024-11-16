@@ -44,6 +44,7 @@ Please refer to this Dockerfile if you want to see how the contract deployer ima
 
 ## Config
 The default configuration with comments is `network_params_template.yaml`, you should copy to your own.
+static_files have config regarding mnemonic and jwtsecret
 
 
 ### Additional configuration recommendations
