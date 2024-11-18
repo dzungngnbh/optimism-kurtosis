@@ -8,7 +8,7 @@ optimism_package:
     - participants:
         - el_type: op-geth
           cl_type: op-node
-        - el_type: op-reth
+        - el_type: op-geth
 ethereum_package:
   network_params:
     preset: minimal
