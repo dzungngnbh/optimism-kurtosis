@@ -35,8 +35,10 @@ def run(plan, l2_el_context):
         },
         env_vars={
             "REDIS_URI": redis_uri.url,
+            # TODO: This should be in config file
             "ADMIN_KEY": "admin",
             "DATABASE_URL": "postgresql://postgres.icudzglqdhghkyjpgzhu:D3WGoVkfxHAi7jzfrh8N@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres",
+            
             "RPC_HTTP_URL": l2_el_context.rpc_http_url,
             "RPC_WS_URL": l2_el_context.ws_url
         },
