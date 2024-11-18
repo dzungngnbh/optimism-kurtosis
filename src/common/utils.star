@@ -1,14 +1,8 @@
-TCP_PROTOCOL                      = "TCP"
-UDP_PROTOCOL                      = "UDP"
-HTTP_APPLICATION_PROTOCOL         = "http"
-DEFAULT_APPLICATION_PROTOCOL      = "http"
-DEFAULT_WAIT                      = "15s"
-
 def new_port_spec(
     number,
-    transport_protocol=TCP_PROTOCOL,
-    application_protocol=DEFAULT_APPLICATION_PROTOCOL,
-    wait=DEFAULT_WAIT,
+    transport_protocol="TCP",
+    application_protocol="http",
+    wait="15s", # default wait to 15s
 ):
     return PortSpec(
         number=number,

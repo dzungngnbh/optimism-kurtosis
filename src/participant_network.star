@@ -3,7 +3,7 @@ input_parser          = import_module("./common/input_parser.star")
 utils                 = import_module("./common/utils.star")
 op_batcher_launcher   = import_module("./batcher/op-batcher/op_batcher_launcher.star")
 
-def launch_participant_network(
+def run(
     plan,
     participants,
     jwt_file,
@@ -80,9 +80,5 @@ def launch_participant_network(
         batcher_key,
         batcher_params,
     )
-
-    # proxyd
-    proxyd_image = { 
-    }
 
     return all_participants

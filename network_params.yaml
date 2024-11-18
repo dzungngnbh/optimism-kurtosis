@@ -190,6 +190,7 @@ optimism_package:
       # Defaults to []
       # Available services:
       # - blockscout
+      # - proxyd
       additional_services: ["blockscout"]
 
   # L2 contract deployer configuration - used for all L2 networks

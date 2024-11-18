@@ -8,7 +8,7 @@ REDIS_MAX_CPU = 1000
 REDIS_MIN_MEMORY = 32
 REDIS_MAX_MEMORY = 1024
 
-def run(plan):
+def run(plan, l2_el_context):
     proxyd_config = plan.upload_files(
         src="/static_files/proxyd/proxyd.toml",
         name="proxyd-config",
@@ -26,15 +26,19 @@ def run(plan):
     service_config = ServiceConfig(
         image=IMAGE,
         ports={
-            "http": utils.new_port_spec(8080),
+            "rpc": utils.new_port_spec(8080),
+            "admin": utils.new_port_spec(8888),
         },
         public_ports={
-            "http": utils.new_port_spec(8080),
+            "rpc": utils.new_port_spec(8080),
+            "admin": utils.new_port_spec(8888),
         },
         env_vars={
             "REDIS_URI": redis_uri.url,
             "ADMIN_KEY": "admin",
-            "DATABSE_URL": "postgresql://postgres.icudzglqdhghkyjpgzhu:D3WGoVkfxHAi7jzfrh8N@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres",
+            "DATABASE_URL": "postgresql://postgres.icudzglqdhghkyjpgzhu:D3WGoVkfxHAi7jzfrh8N@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres",
+            "RPC_HTTP_URL": l2_el_context.rpc_http_url,
+            "RPC_WS_URL": l2_el_context.ws_url
         },
         files={
             "/etc/proxyd/": proxyd_config

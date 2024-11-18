@@ -7,8 +7,8 @@ BATCHER_HTTP_PORT_ID  = "http"
 BATCHER_HTTP_PORT_NUM = 8548
 
 PORTS = {
-    BATCHER_HTTP_PORT_ID: utils.new_port_spec(
-        number=BATCHER_HTTP_PORT_NUM
+    "http": utils.new_port_spec(
+        number=8548
     ),
 }
 

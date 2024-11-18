@@ -1,10 +1,10 @@
 participant_network = import_module("./participant_network.star")
-blockscout = import_module("./blockscout/blockscout_launcher.star")
 contract_deployer = import_module("./contracts/contract_deployer.star")
 input_parser = import_module("./common/input_parser.star")
 utils = import_module("./common/utils.star")
 
-JWT_PATH_FILEPATH = "/static_files/jwt/jwtsecret"
+blockscout = import_module("./blockscout/blockscout_launcher.star")
+proxyd = import_module("./proxyd/proxyd.star")
 
 def run(
     plan,
@@ -24,11 +24,11 @@ def run(
 
     plan.print("Deploying L2 with name {0}".format(network_params.name))
     jwt_file = plan.upload_files(
-        src=JWT_PATH_FILEPATH,
+        src="/static_files/jwt/jwtsecret",
         name="op_jwt_file{0}".format(l2_services_suffix),
     )
 
-    l2_participants = participant_network.launch_participant_network(
+    l2_participants = participant_network.run(
         plan,
         l2_args.participants,
         jwt_file,
@@ -59,6 +59,7 @@ def run(
         ),
     )
 
+    l2_el_context = all_el_contexts[0] # op
     for additional_service in l2_args.additional_services:
         if additional_service == "blockscout":
             plan.print("Launching op-blockscout")
@@ -72,6 +73,13 @@ def run(
                 network_params.network_id,
             )
             plan.print("Successfully launched op-blockscout")
+
+    plan.print("Launching proxyd")
+    proxyd.run(
+        plan,
+        l2_el_context
+    )
+    plan.print("Successfully launched proxyd")
 
     plan.print(l2_participants)
     plan.print(

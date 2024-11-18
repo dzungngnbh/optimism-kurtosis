@@ -1,12 +1,10 @@
-el_admin_node_info = import_module(
-    "github.com/ethpandaops/ethereum-package/src/el/el_admin_node_info.star"
-)
+el_admin_node_info = import_module("../../el/el_admin_node_info.star")
+el_context = import_module("../../el/el_context.star")
 
 constants = import_module("../../common/constants.star")
-utils = import_module("../../common/utils.star")
 input_parser = import_module("../../common/input_parser.star")
-el_context = import_module("../../el/el_context.star")
 node_metrics_info = import_module("../../common/node_metrics_info.star")
+utils = import_module("../../common/utils.star")
 
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
@@ -33,29 +31,26 @@ METRICS_PATH = "/metrics"
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/op-reth/execution-data"
 
 def get_ports(discovery_port=DISCOVERY_PORT_NUM):
-    ports = {
+    return {
         RPC_PORT_ID: utils.new_port_spec(
             RPC_PORT_NUM,
-            utils.TCP_PROTOCOL,
-            utils.HTTP_APPLICATION_PROTOCOL,
         ),
         WS_PORT_ID: utils.new_port_spec(
-            WS_PORT_NUM, utils.TCP_PROTOCOL
+            WS_PORT_NUM
         ),
         TCP_DISCOVERY_PORT_ID: utils.new_port_spec(
-            DISCOVERY_PORT_NUM, utils.TCP_PROTOCOL
+            DISCOVERY_PORT_NUM
         ),
         UDP_DISCOVERY_PORT_ID: utils.new_port_spec(
-            DISCOVERY_PORT_NUM, utils.UDP_PROTOCOL
+            DISCOVERY_PORT_NUM
         ),
         ENGINE_RPC_PORT_ID: utils.new_port_spec(
-            ENGINE_RPC_PORT_NUM, utils.TCP_PROTOCOL
+            ENGINE_RPC_PORT_NUM
         ),
         METRICS_PORT_ID: utils.new_port_spec(
-            METRICS_PORT_NUM, utils.TCP_PROTOCOL
+            METRICS_PORT_NUM
         ),
     }
-    return ports
 
 
 VERBOSITY_LEVELS = {

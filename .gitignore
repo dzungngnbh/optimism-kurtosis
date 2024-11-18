@@ -1,3 +1,6 @@
+# vegeta
+results.bin
+
 # General files
 *_secret*
 .DS_Store
@@ -34,6 +37,7 @@ Thumbs.db
 # Log files
 /logs/
 *.log
+log*
 
 # SSL Certificates
 /*.key

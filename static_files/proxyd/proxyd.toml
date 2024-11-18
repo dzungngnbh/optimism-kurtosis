@@ -60,10 +60,10 @@ max_error_rate_threshold = 0.3
 [backends.infura]
 # The URL to contact the backend at. Will be read from the environment
 # if an environment variable prefixed with $ is provided.
-rpc_url = "http://127.0.0.1:33022"
+rpc_url = "$RPC_HTTP_URL"
 # The WS URL to contact the backend at. Will be read from the environment
 # if an environment variable prefixed with $ is provided.
-ws_url = "ws://127.0.0.1:32990"
+ws_url = ""
 username = ""
 # An HTTP Basic password to authenticate with the backend. Will be read from
 # the environment if an environment variable prefixed with $ is provided.

@@ -7,6 +7,7 @@ utils        = import_module("../../common/utils.star")
 
 # The Docker container runs as the "op-node" user so we can't write to root
 BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-node/op-node-beacon-data"
+
 # Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
@@ -20,15 +21,15 @@ BEACON_HTTP_PORT_NUM = 8547
 def get_used_ports(discovery_port):
     used_ports = {
         BEACON_TCP_DISCOVERY_PORT_ID: utils.new_port_spec(
-            discovery_port, utils.TCP_PROTOCOL, wait=None
+            discovery_port, "TCP", wait=None
         ),
         BEACON_UDP_DISCOVERY_PORT_ID: utils.new_port_spec(
-            discovery_port, utils.UDP_PROTOCOL, wait=None
+            discovery_port, "UDP", wait=None
         ),
         BEACON_HTTP_PORT_ID: utils.new_port_spec(
             BEACON_HTTP_PORT_NUM,
-            utils.TCP_PROTOCOL,
-            utils.HTTP_APPLICATION_PROTOCOL,
+            "TCP",
+            "http",
         ),
     }
     return used_ports

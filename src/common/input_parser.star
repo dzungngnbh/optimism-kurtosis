@@ -1,21 +1,23 @@
 sanity_check = import_module("./sanity_check.star")
 
+OP_VERSION = "v1.9.5"
+
 DEFAULT_EL_IMAGES = {
-    "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:latest",
+    "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:{0}".format(OP_VERSION),
     "op-reth": "ghcr.io/paradigmxyz/op-reth:latest",
 }
 
 # TODOs: Change :develop to stable
 DEFAULT_CL_IMAGES = {
-    "op-node": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:develop",
+    "op-node": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node:{0}".format(OP_VERSION),
 }
 
 DEFAULT_BATCHER_IMAGES = {
-    "op-batcher": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:develop",
+    "op-batcher": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-batcher:{0}".format(OP_VERSION),
 }
 
 DEFAULT_PROPOSER_IMAGES = {
-    "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:develop",
+    "op-proposer": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-proposer:{0}".format(OP_VERSION),
 }
 
 DEFAULT_ADDITIONAL_SERVICES = ["blockscout"]
