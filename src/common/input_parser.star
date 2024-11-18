@@ -1,6 +1,6 @@
 sanity_check = import_module("./sanity_check.star")
 
-OP_VERSION = "v1.9.5"
+OP_VERSION = "latest"
 
 DEFAULT_EL_IMAGES = {
     "op-geth": "us-docker.pkg.dev/oplabs-tools-artifacts/images/op-geth:{0}".format(OP_VERSION),
