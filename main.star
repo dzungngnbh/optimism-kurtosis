@@ -5,11 +5,6 @@ input_parser = import_module("./src/common/input_parser.star")
 l2_launcher = import_module("./src/l2_launcher.star")
 wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 
-# proxyd = import_module("./src/proxy/proxyd.star")
-#
-# def run(plan):
-#     proxyd.run(plan)
-#
 def run(plan, args):
     """Deploy Optimism L2s on an Ethereum L1.
 
