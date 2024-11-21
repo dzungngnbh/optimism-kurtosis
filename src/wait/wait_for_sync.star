@@ -3,7 +3,7 @@ utils = import_module("../common/utils.star")
 def wait_for_sync(plan, l1_config_env_vars):
     plan.run_sh(
         name="wait-for-l1-sync",
-        description="Wait for L1 to sync up to network - this can take up to 3days",
+        description="Wait for L1 to sync up to network - this can take up to 3days for mainnet",
         env_vars=l1_config_env_vars,
         run='while true; do sleep 5; \
             current_head=$(curl -s $CL_RPC_URL/eth/v1/node/syncing | jq -r \'.data.head_slot\'); \

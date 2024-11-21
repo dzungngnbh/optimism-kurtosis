@@ -7,9 +7,7 @@ BATCHER_HTTP_PORT_ID  = "http"
 BATCHER_HTTP_PORT_NUM = 8548
 
 PORTS = {
-    "http": utils.new_port_spec(
-        number=8548
-    ),
+    "http": utils.new_port_spec(BATCHER_HTTP_PORT_NUM),
 }
 
 def run(
