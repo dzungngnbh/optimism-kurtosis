@@ -36,9 +36,9 @@ def run(plan, l2_el_context):
         env_vars={
             "REDIS_URI": redis_uri.url,
             # TODO: This should be in config file
-            "ADMIN_KEY": "admin",
+            "ADMIN_KEY": "<admin-key>",
             "DATABASE_URL": "<database-url>",
-            
+
             "RPC_HTTP_URL": l2_el_context.rpc_http_url,
             "RPC_WS_URL": l2_el_context.ws_url
         },

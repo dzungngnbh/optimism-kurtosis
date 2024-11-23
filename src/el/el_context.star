@@ -11,6 +11,24 @@ def new(
         service_name="",
         el_metrics_info=None,
 ):
+    """Creates a new Execution Layer context with the specified parameters.
+
+    Args:
+        client_name: Name of the client implementation.
+        enode: enode identifier for the node.
+        ip_addr: IP address of the node.
+        rpc_port_num: Port number for RPC connections.
+        ws_port_num: Port number for WebSocket connections.
+        engine_rpc_port_num: Port number for engine RPC.
+        rpc_http_url: HTTP URL for RPC endpoint.
+        ws_url: WebSocket URL (optional).
+        enr: ENR string (optional).
+        service_name: Name of the service (optional).
+        el_metrics_info: Metrics information (optional).
+
+    Returns:
+        A struct containing the execution layer context configuration.
+    """
     return struct(
         client_name=client_name,
         enode=enode,

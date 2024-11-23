@@ -1,6 +1,15 @@
 utils = import_module("../common/utils.star")
 
 def wait_for_sync(plan, l1_config_env_vars):
+    """Waits for L1 node to complete synchronization with the network.
+
+     Args:
+         plan: Kurtosis execution plan.
+         l1_config_env_vars: Environment variables for L1 configuration.
+
+     Returns:
+         None
+     """
     plan.run_sh(
         name="wait-for-l1-sync",
         description="Wait for L1 to sync up to network - this can take up to 3days for mainnet",
@@ -24,6 +33,15 @@ def wait_for_sync(plan, l1_config_env_vars):
 
 
 def wait_for_startup(plan, l1_config_env_vars):
+    """Waits for L1 chain to complete initial startup.
+
+    Args:
+        plan: Kurtosis execution plan.
+        l1_config_env_vars: L1 configuration environment variables.
+
+    Returns:
+        None
+    """
     plan.run_sh(
         name="wait-for-l1-startup",
         description="Wait for L1 to start successfully, can take up to 5 minutes",

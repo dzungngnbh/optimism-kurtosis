@@ -34,6 +34,19 @@ METRICS_PATH = "/debug/metrics/prometheus"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/geth/execution-data"
 
+ENTRYPOINT_ARGS = ["sh", "-c"]
+
+VERBOSITY_LEVELS = {
+    constants.GLOBAL_LOG_LEVEL.error: "1",
+    constants.GLOBAL_LOG_LEVEL.warn: "2",
+    constants.GLOBAL_LOG_LEVEL.info: "3",
+    constants.GLOBAL_LOG_LEVEL.debug: "4",
+    constants.GLOBAL_LOG_LEVEL.trace: "5",
+}
+
+BUILDER_IMAGE_STR = "builder"
+SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
+
 def get_ports(discovery_port=DISCOVERY_PORT_NUM):
     return {
         RPC_PORT_ID: utils.new_port_spec(
@@ -55,20 +68,6 @@ def get_ports(discovery_port=DISCOVERY_PORT_NUM):
             METRICS_PORT_NUM
         ),
     }
-
-ENTRYPOINT_ARGS = ["sh", "-c"]
-
-VERBOSITY_LEVELS = {
-    constants.GLOBAL_LOG_LEVEL.error: "1",
-    constants.GLOBAL_LOG_LEVEL.warn: "2",
-    constants.GLOBAL_LOG_LEVEL.info: "3",
-    constants.GLOBAL_LOG_LEVEL.debug: "4",
-    constants.GLOBAL_LOG_LEVEL.trace: "5",
-}
-
-BUILDER_IMAGE_STR = "builder"
-SUAVE_ENABLED_GETH_IMAGE_STR = "suave"
-
 
 def run(
     plan,

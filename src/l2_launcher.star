@@ -19,6 +19,24 @@ def run(
     global_tolerations,
     persistent,
 ):
+    """Deploys Layer 2 network with specified configuration and services.
+
+    Args:
+        plan: Kurtosis execution plan.
+        l2_services_suffix: Suffix for L2 service names.
+        l2_args: Layer 2 configuration arguments.
+        deployment_output: Deployment configuration output.
+        l1_config: Layer 1 configuration.
+        l1_private_key: Layer 1 private key.
+        l1_bootnode_context: Layer 1 bootnode context.
+        global_log_level: Global logging level.
+        global_node_selectors: Global node selectors for K8s.
+        global_tolerations: Global tolerations for K8s.
+        persistent: Whether to use persistent storage.
+
+    Returns:
+        None
+    """
     network_params = l2_args.network_params
     batcher_params = l2_args.batcher_params
 

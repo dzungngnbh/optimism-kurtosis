@@ -22,6 +22,25 @@ def run(
     global_tolerations,
     persistent,
 ):
+    """Launches execution and consensus layer clients for each participant.
+
+    Args:
+        plan: Kurtosis execution plan.
+        jwt_file: JWT authentication file.
+        network_params: Network configuration parameters.
+        deployment_output: Deployment configuration output.
+        participants: List of participant configurations.
+        num_participants: Number of participants.
+        l1_config_env_vars: L1 configuration environment variables.
+        l2_services_suffix: Suffix for L2 service names.
+        global_log_level: Global logging level.
+        global_node_selectors: Global node selectors for K8s.
+        global_tolerations: Global tolerations for K8s.
+        persistent: Whether to use persistent storage.
+
+    Returns:
+        Tuple containing lists of EL and CL contexts.
+    """
     el_launchers = {
         "op-geth": {
             "launcher": op_geth.new_op_geth_launcher(

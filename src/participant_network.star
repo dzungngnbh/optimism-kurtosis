@@ -17,6 +17,25 @@ def run(
     global_tolerations,
     persistent,
 ):
+    """Launches network participants and batcher service.
+
+    Args:
+        plan: Kurtosis execution plan.
+        participants: List of network participants.
+        jwt_file: JWT authentication file.
+        network_params: Network configuration parameters.
+        batcher_params: Batcher service parameters.
+        deployment_output: Deployment configuration output.
+        l1_config_env_vars: L1 configuration environment variables.
+        l2_services_suffix: Suffix for L2 service names.
+        global_log_level: Global logging level.
+        global_node_selectors: Global node selectors for K8s.
+        global_tolerations: Global tolerations for K8s.
+        persistent: Whether to use persistent storage.
+
+    Returns:
+        List of participant configurations.
+    """
     num_participants = len(participants)
     # First EL and sequencer CL
     all_el_contexts, all_cl_contexts = el_cl_client_launcher.run(
