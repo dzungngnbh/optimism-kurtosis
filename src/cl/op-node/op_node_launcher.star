@@ -1,43 +1,17 @@
-cl_context   = import_module("../cl_context.star")
-constants    = import_module("../../common/constants.star")
+cl_context = import_module("../cl_context.star")
+constants = import_module("../../common/constants.star")
 input_parser = import_module("../../common/input_parser.star")
-utils        = import_module("../../common/utils.star")
+utils = import_module("../../common/utils.star")
 
-#  ---------------------------------- Beacon client -------------------------------------
+BEACON_DATA_DIRPATH = "/data/op-node/op-node-beacon-data"
+BEACON_DISCOVERY_PORT_NUM = 9003
+BEACON_HTTP_PORT_NUM = 8547
 
-# The Docker container runs as the "op-node" user so we can't write to root
-BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER = "/data/op-node/op-node-beacon-data"
-
-# Port IDs
 BEACON_TCP_DISCOVERY_PORT_ID = "tcp-discovery"
 BEACON_UDP_DISCOVERY_PORT_ID = "udp-discovery"
 BEACON_HTTP_PORT_ID = "http"
 
-# Port nums
-BEACON_DISCOVERY_PORT_NUM = 9003
-BEACON_HTTP_PORT_NUM = 8547
-
-# Resources
 VOLUME_SIZE = 1000 # 1GB
-
-def get_used_ports(discovery_port):
-    used_ports = {
-        BEACON_TCP_DISCOVERY_PORT_ID: utils.new_port_spec(
-            discovery_port, "TCP", wait=None
-        ),
-        BEACON_UDP_DISCOVERY_PORT_ID: utils.new_port_spec(
-            discovery_port, "UDP", wait=None
-        ),
-        BEACON_HTTP_PORT_ID: utils.new_port_spec(
-            BEACON_HTTP_PORT_NUM,
-            "TCP",
-            "http",
-        ),
-    }
-    return used_ports
-
-
-ENTRYPOINT_ARGS = ["sh", "-c"]
 
 VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.error: "ERROR",
@@ -47,22 +21,28 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.trace: "TRACE",
 }
 
+def run(plan, launcher, service_name, participant, global_log_level, persistent, tolerations, node_selectors, el_context, existing_cl_clients, l1_config_env_vars, sequencer_enabled):
+    """
+    Launches an op-node service with the specified configuration.
 
-def run(
-    plan,
-    launcher,
-    service_name,
-    participant,
-    global_log_level,
-    persistent,
-    tolerations,
-    node_selectors,
-    el_context,
-    existing_cl_clients,
-    l1_config_env_vars,
-    sequencer_enabled,
-):
-    beacon_node_identity_recipe = PostHttpRequestRecipe(
+    Args:
+        plan: Kurtosis execution plan
+        launcher: Launcher configuration object
+        service_name: Name of the service to create
+        participant: Node participant configuration
+        global_log_level: Global logging level
+        persistent: Whether to use persistent storage
+        tolerations: Kubernetes tolerations
+        node_selectors: Kubernetes node selectors
+        el_context: Execution layer context
+        existing_cl_clients: List of existing CL clients
+        l1_config_env_vars: L1 configuration environment variables
+        sequencer_enabled: Whether sequencer mode is enabled
+
+    Returns:
+        CLContext: Context object containing node information
+    """
+    beacon_node_identity = PostHttpRequestRecipe(
         endpoint="/",
         content_type="application/json",
         body='{"jsonrpc":"2.0","method":"opp2p_self","params":[],"id":1}',
@@ -78,122 +58,54 @@ def run(
         participant.cl_log_level, global_log_level, VERBOSITY_LEVELS
     )
 
-    config = get_beacon_config(
-        plan,
-        launcher,
-        service_name,
-        participant,
-        log_level,
-        persistent,
-        tolerations,
-        node_selectors,
-        el_context,
-        existing_cl_clients,
-        l1_config_env_vars,
-        beacon_node_identity_recipe,
-        sequencer_enabled,
+    config = _get_beacon_config(
+        plan, launcher, service_name, participant, log_level, persistent,
+        tolerations, node_selectors, el_context, existing_cl_clients,
+        l1_config_env_vars, beacon_node_identity, sequencer_enabled,
     )
 
     beacon_service = plan.add_service(service_name, config)
-
-    beacon_http_port = beacon_service.ports[BEACON_HTTP_PORT_ID]
-    beacon_http_url = "http://{0}:{1}".format(
-        beacon_service.ip_address, beacon_http_port.number
-    )
-
-    response = plan.request(
-        recipe=beacon_node_identity_recipe, service_name=service_name
-    )
-
-    beacon_node_enr = response["extract.enr"]
-    beacon_multiaddr = response["extract.multiaddr"]
-    beacon_peer_id = response["extract.peer_id"]
+    response = plan.request(recipe=beacon_node_identity, service_name=service_name)
 
     return cl_context.new_cl_context(
         client_name="op-node",
-        enr=beacon_node_enr,
+        enr=response["extract.enr"],
         ip_addr=beacon_service.ip_address,
-        http_port=beacon_http_port.number,
-        beacon_http_url=beacon_http_url,
+        http_port=beacon_service.ports[BEACON_HTTP_PORT_ID].number,
+        beacon_http_url="http://{0}:{1}".format(
+            beacon_service.ip_address,
+            beacon_service.ports[BEACON_HTTP_PORT_ID].number
+        ),
         cl_nodes_metrics_info=None,
         beacon_service_name=service_name,
-        multiaddr=beacon_multiaddr,
-        peer_id=beacon_peer_id,
+        multiaddr=response["extract.multiaddr"],
+        peer_id=response["extract.peer_id"],
     )
 
+def _get_used_ports():
+    return {
+        BEACON_TCP_DISCOVERY_PORT_ID: utils.new_port_spec(BEACON_DISCOVERY_PORT_NUM, "TCP"),
+        BEACON_UDP_DISCOVERY_PORT_ID: utils.new_port_spec(BEACON_DISCOVERY_PORT_NUM, "UDP"),
+        BEACON_HTTP_PORT_ID: utils.new_port_spec(BEACON_HTTP_PORT_NUM, "TCP", "http"),
+    }
 
-def get_beacon_config(
-    plan,
-    launcher,
-    service_name,
-    participant,
-    log_level,
-    persistent,
-    tolerations,
-    node_selectors,
-    el_context,
-    existing_cl_clients,
-    l1_config_env_vars,
-    beacon_node_identity_recipe,
-    sequencer_enabled,
-):
-    EXECUTION_ENGINE_ENDPOINT = "http://{0}:{1}".format(
-        el_context.ip_addr,
-        el_context.engine_rpc_port_num,
-    )
-
-    used_ports = get_used_ports(BEACON_DISCOVERY_PORT_NUM)
-
-    cmd = [
-        "op-node",
-        "--l2={0}".format(EXECUTION_ENGINE_ENDPOINT),
-        "--l2.jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
-        "--verifier.l1-confs=4",
-        "--rollup.config="
-        + constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS
-        + "/rollup-{0}.json".format(launcher.network_params.network_id),
-        "--rpc.addr=0.0.0.0",
-        "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
-        "--rpc.enable-admin",
-        "--l1={0}".format(l1_config_env_vars["L1_RPC_URL"]),
-        "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
-        "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
-        "--l1.trustrpc",
-        "--p2p.advertise.ip="
-        + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "--p2p.advertise.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--p2p.advertise.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--p2p.listen.ip=0.0.0.0",
-        "--p2p.listen.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
-        "--p2p.listen.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
-    ]
-
-    sequencer_private_key = utils.read_network_config_value(
-        plan,
-        launcher.deployment_output,
-        "sequencer-{0}".format(launcher.network_params.network_id),
-        ".privateKey",
-    )
+def _get_beacon_config(plan, launcher, service_name, participant, log_level, persistent, tolerations, node_selectors, el_context, existing_cl_clients, l1_config_env_vars, beacon_node_identity, sequencer_enabled):
+    cmd = _build_command(launcher, el_context, l1_config_env_vars, existing_cl_clients)
 
     if sequencer_enabled:
-        cmd.append("--p2p.sequencer.key=" + sequencer_private_key)
-        cmd.append("--sequencer.enabled")
-        cmd.append("--sequencer.l1-confs=5")
-
-    if len(existing_cl_clients) > 0:
-        cmd.append(
-            "--p2p.bootnodes="
-            + ",".join(
-                [
-                    ctx.enr
-                    for ctx in existing_cl_clients[
-                        : constants.MAX_ENR_ENTRIES
-                    ]
-                ]
-            )
+        sequencer_key = utils.read_network_config_value(
+            plan,
+            launcher.deployment_output,
+            "sequencer-{0}".format(launcher.network_params.network_id),
+            ".privateKey",
         )
+        cmd.extend([
+            "--p2p.sequencer.key={0}".format(sequencer_key),
+            "--sequencer.enabled",
+            "--sequencer.l1-confs=5",
+        ])
 
-    cmd += participant.cl_extra_params
+    cmd.extend(participant.cl_extra_params)
 
     files = {
         constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS: launcher.deployment_output,
@@ -202,50 +114,71 @@ def get_beacon_config(
 
     if persistent:
         size = int(participant.el_volume_size) if int(participant.el_volume_size) > 0 else VOLUME_SIZE
-        files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
+        files[BEACON_DATA_DIRPATH] = Directory(
             persistent_key="data-{0}".format(service_name),
             size=size,
         )
 
-    ports = {}
-    ports.update(used_ports)
-
-    env_vars = participant.cl_extra_env_vars
-    config_args = {
-        "image": participant.cl_image,
-        "ports": ports,
-        "cmd": cmd,
-        "files": files,
-        "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
-        "env_vars": env_vars,
-        "labels": utils.label_maker(
+    return ServiceConfig(
+        image=participant.cl_image,
+        ports=_get_used_ports(),
+        cmd=cmd,
+        files=files,
+        env_vars=participant.cl_extra_env_vars,
+        private_ip_address_placeholder=constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        labels=utils.label_maker(
             client="op-node",
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image,
             connected_client=el_context.client_name,
             extra_labels=participant.cl_extra_labels,
         ),
-        "ready_conditions": ReadyCondition(
-            recipe=beacon_node_identity_recipe,
+        ready_conditions=ReadyCondition(
+            recipe=beacon_node_identity,
             field="code",
             assertion="==",
             target_value=200,
             timeout="1m",
         ),
-        "tolerations": tolerations,
-        "node_selectors": node_selectors,
-    }
+        tolerations=tolerations,
+        node_selectors=node_selectors,
+        min_cpu=participant.cl_min_cpu if participant.cl_min_cpu > 0 else None,
+        max_cpu=participant.cl_max_cpu if participant.cl_max_cpu > 0 else None,
+        min_memory=participant.cl_min_mem if participant.cl_min_mem > 0 else None,
+        max_memory=participant.cl_max_mem if participant.cl_max_mem > 0 else None,
+    )
 
-    if participant.cl_min_cpu > 0:
-        config_args["min_cpu"] = participant.cl_min_cpu
-    if participant.cl_max_cpu > 0:
-        config_args["max_cpu"] = participant.cl_max_cpu
-    if participant.cl_min_mem > 0:
-        config_args["min_memory"] = participant.cl_min_mem
-    if participant.cl_max_mem > 0:
-        config_args["max_memory"] = participant.cl_max_mem
-    return ServiceConfig(**config_args)
+def _build_command(launcher, el_context, l1_config_env_vars, existing_cl_clients):
+    cmd = [
+        "op-node",
+        "--l2=http://{0}:{1}".format(el_context.ip_addr, el_context.engine_rpc_port_num),
+        "--l2.jwt-secret=" + constants.JWT_MOUNT_PATH_ON_CONTAINER,
+        "--verifier.l1-confs=4",
+        "--rollup.config={0}/rollup-{1}.json".format(
+            constants.GENESIS_DATA_MOUNTPOINT_ON_CLIENTS,
+            launcher.network_params.network_id
+        ),
+        "--rpc.addr=0.0.0.0",
+        "--rpc.port={0}".format(BEACON_HTTP_PORT_NUM),
+        "--rpc.enable-admin",
+        "--l1={0}".format(l1_config_env_vars["L1_RPC_URL"]),
+        "--l1.rpckind={0}".format(l1_config_env_vars["L1_RPC_KIND"]),
+        "--l1.beacon={0}".format(l1_config_env_vars["CL_RPC_URL"]),
+        "--l1.trustrpc",
+        "--p2p.advertise.ip=" + constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+        "--p2p.advertise.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--p2p.advertise.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--p2p.listen.ip=0.0.0.0",
+        "--p2p.listen.tcp={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        "--p2p.listen.udp={0}".format(BEACON_DISCOVERY_PORT_NUM),
+        ]
 
+    if existing_cl_clients:
+        cmd.append("--p2p.bootnodes=" + ",".join([
+            ctx.enr for ctx in existing_cl_clients[:constants.MAX_ENR_ENTRIES]
+        ]))
+
+    return cmd
 
 def new_op_node_launcher(deployment_output, jwt_file, network_params):
     return struct(
