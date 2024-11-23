@@ -142,10 +142,10 @@ def _get_beacon_config(plan, launcher, service_name, participant, log_level, per
         ),
         tolerations=tolerations,
         node_selectors=node_selectors,
-        min_cpu=participant.cl_min_cpu if participant.cl_min_cpu > 0 else None,
-        max_cpu=participant.cl_max_cpu if participant.cl_max_cpu > 0 else None,
-        min_memory=participant.cl_min_mem if participant.cl_min_mem > 0 else None,
-        max_memory=participant.cl_max_mem if participant.cl_max_mem > 0 else None,
+        min_cpu=participant.cl_min_cpu,
+        max_cpu=participant.cl_max_cpu,
+        min_memory=participant.cl_min_mem,
+        max_memory=participant.cl_max_mem,
     )
 
 def _build_command(launcher, el_context, l1_config_env_vars, existing_cl_clients):
