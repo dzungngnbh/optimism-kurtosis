@@ -7,85 +7,83 @@ wait_for_sync = import_module("./src/wait/wait_for_sync.star")
 
 def run(plan, args):
     """Deploy Optimism L2s on an Ethereum L1.
-
     Args:
-        args(json): Configures other aspects of the environment.
-    Returns:
-        Full deployment of Optimism L2(s)
+        plan: Kurtosis execution plan
+        args: Configuration arguments for deployment
     """
-    plan.print("Parsing the L1 input args")
+    l1_config = _deploy_l1(plan, args)
+    _deploy_l2(plan, args, l1_config)
 
-    # Deploy L1 and L2 smart contract
-    # Use default ethereum network params
+def _deploy_l1(plan, args):
+    plan.print("Preparing Ethereum L1 configuration")
     ethereum_args = args.get("ethereum_package", {})
     if "network_params" not in ethereum_args:
         ethereum_args.update(input_parser.default_ethereum_package_network_params())
 
-    # deploy L1
-    plan.print("Deploying a local L1")
+    plan.print("Deploying Ethereum L1 network")
     l1 = ethereum_package.run(plan, ethereum_args)
-    plan.print(l1.network_params)
+    l1_env_vars = _get_l1_env_vars(l1)
 
-    # get L1 info
-    all_l1_participants = l1.all_participants
-    l1_network_params = l1.network_params
-    l1_network_id = l1.network_id
-    l1_private_key = l1.pre_funded_accounts[
-        12
-    ].private_key  # reserved for L2 contract deployers
-    l1_env_vars = get_l1_env_vars(all_l1_participants, l1_network_params, l1_network_id)
-
-    if l1_network_params.network == "kurtosis":
-        plan.print("Waiting for L1 to start up")
+    if l1.network_params.network == "kurtosis":
+        plan.print("Waiting for L1 network startup")
         wait_for_sync.wait_for_startup(plan, l1_env_vars)
     else:
-        plan.print("Waiting for network to sync")
+        plan.print("Waiting for L1 network sync")
         wait_for_sync.wait_for_sync(plan, l1_env_vars)
 
-    # Get L2 config
-    # need to do a raw get here in case only optimism_package is provided.
-    # .get will return None if the key is in the config with a None value.
-    optimism_args = args.get("optimism_package") or input_parser.default_optimism_args()
-    optimism_args_with_right_defaults = input_parser.input_parser(plan, optimism_args)
-    global_tolerations = optimism_args_with_right_defaults.global_tolerations
-    global_node_selectors = optimism_args_with_right_defaults.global_node_selectors
-    global_log_level = optimism_args_with_right_defaults.global_log_level
-    persistent = optimism_args_with_right_defaults.persistent
+    return l1
 
-    # deploy L2 smart contract
-    deployment_output = contract_deployer.deploy_contracts(
+def _get_l1_env_vars(l1):
+    participant = l1.all_participants[0]
+    return {
+        "L1_RPC_KIND": "standard",
+        "WEB3_RPC_URL": str(participant.el_context.rpc_http_url),
+        "L1_RPC_URL": str(participant.el_context.rpc_http_url),
+        "CL_RPC_URL": str(participant.cl_context.beacon_http_url),
+        "L1_WS_URL": str(participant.el_context.ws_url),
+        "L1_CHAIN_ID": str(l1.network_id),
+        "L1_BLOCK_TIME": str(l1.network_params.seconds_per_slot),
+    }
+
+def _deploy_l2(plan, args, l1):
+    plan.print("Preparing Optimism L2 configuration")
+    optimism_args = args.get("optimism_package") or input_parser.default_optimism_args()
+    optimism_config = input_parser.input_parser(plan, optimism_args)
+
+    l1_env_vars = _get_l1_env_vars(l1)
+    l1_private_key = l1.pre_funded_accounts[12].private_key
+
+    plan.print("Deploying L2 contracts")
+    deployment = contract_deployer.deploy_contracts(
         plan,
         l1_private_key,
         l1_env_vars,
-        optimism_args_with_right_defaults,
+        optimism_config,
     )
 
-    # launch L2 nodes: cl and el.
-    for chain in optimism_args_with_right_defaults.chains:
+    plan.print("Launching L2 nodes")
+    _launch_l2_nodes(
+        plan,
+        optimism_config,
+        l1,
+        l1_private_key,
+        l1_env_vars,
+        deployment
+    )
+
+def _launch_l2_nodes(plan, optimism_config, l1, l1_private_key, l1_env_vars, deployment):
+    for chain in optimism_config.chains:
+        plan.print("Launching L2 chain: {}".format(chain.network_params.name))
         l2_launcher.run(
             plan,
             chain.network_params.name,
             chain,
-            deployment_output,
+            deployment,
             l1_env_vars,
             l1_private_key,
-            all_l1_participants[0].el_context,
-            global_log_level,
-            global_node_selectors,
-            global_tolerations,
-            persistent,
+            l1.all_participants[0].el_context,
+            optimism_config.global_log_level,
+            optimism_config.global_node_selectors,
+            optimism_config.global_tolerations,
+            optimism_config.persistent,
         )
-
-
-# get l1 config and set global env vars.
-def get_l1_env_vars(all_l1_participants, l1_network_params, l1_network_id):
-    first_l1_participant = all_l1_participants[0]
-    return {
-        "L1_RPC_KIND": "standard",
-        "WEB3_RPC_URL": str(first_l1_participant.el_context.rpc_http_url),
-        "L1_RPC_URL": str(first_l1_participant.el_context.rpc_http_url),
-        "CL_RPC_URL": str(first_l1_participant.cl_context.beacon_http_url),
-        "L1_WS_URL": str(first_l1_participant.el_context.ws_url),
-        "L1_CHAIN_ID": str(l1_network_id),
-        "L1_BLOCK_TIME": str(l1_network_params.seconds_per_slot),
-    }

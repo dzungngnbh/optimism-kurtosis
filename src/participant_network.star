@@ -67,7 +67,7 @@ def run(
     op_batcher_image = (
         batcher_params.image
         if batcher_params.image != ""
-        else input_parser.DEFAULT_BATCHER_IMAGES["op-batcher"]
+        else input_parser.BATCHER_IMAGES["op-batcher"]
     )
 
     op_batcher_launcher.run(
