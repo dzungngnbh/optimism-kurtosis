@@ -19,6 +19,8 @@ METRICS_PORT_NUM = 9001
 EXECUTION_MIN_CPU = 100
 EXECUTION_MIN_MEMORY = 256
 
+VOLUME_SIZE = 5000 # 5GB
+
 # Port IDs
 RPC_PORT_ID = "rpc"
 WS_PORT_ID = "ws"
@@ -139,7 +141,6 @@ def get_config(
     sequencer_enabled,
     sequencer_context,
 ):
-    public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
     ports = get_ports()
 
@@ -197,13 +198,10 @@ def get_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
     if persistent:
+        size = int(participant.el_volume_size) if int(participant.el_volume_size) > 0 else VOLUME_SIZE
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.op_reth + "_volume_size"
-            ],
+            size=size,
         )
 
     cmd += participant.el_extra_params
@@ -216,7 +214,7 @@ def get_config(
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": utils.label_maker(
-            client=constants.EL_TYPE.op_reth,
+            client="op-reth",
             client_type=constants.CLIENT_TYPES.el,
             image=IMAGE,
             connected_client=cl_client_name,

@@ -17,6 +17,8 @@ BEACON_HTTP_PORT_ID = "http"
 BEACON_DISCOVERY_PORT_NUM = 9003
 BEACON_HTTP_PORT_NUM = 8547
 
+# Resources
+VOLUME_SIZE = 1000 # 1GB
 
 def get_used_ports(discovery_port):
     used_ports = {
@@ -199,13 +201,10 @@ def get_beacon_config(
     }
 
     if persistent:
+        size = int(participant.el_volume_size) if int(participant.el_volume_size) > 0 else VOLUME_SIZE
         files[BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
-            size=int(participant.cl_volume_size)
-            if int(participant.cl_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.CL_TYPE.hildr + "_volume_size"
-            ],
+            size=size,
         )
 
     ports = {}
@@ -220,7 +219,7 @@ def get_beacon_config(
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": utils.label_maker(
-            client=constants.CL_TYPE.op_node,
+            client="op-node",
             client_type=constants.CLIENT_TYPES.cl,
             image=participant.cl_image,
             connected_client=el_context.client_name,

@@ -9,12 +9,13 @@ utils     = import_module("../../common/utils.star")
 RPC_PORT_NUM         = 8545
 WS_PORT_NUM          = 8546
 DISCOVERY_PORT_NUM   = 30303
-ENGINE_RPC_PORT_NUM  = 8551
-METRICS_PORT_NUM     = 9001
+ENGINE_RPC_PORT_NUM  = 8551; METRICS_PORT_NUM     = 9001
 
 # The min/max CPU/memory that the execution node can use
 EXECUTION_MIN_CPU    = 300
 EXECUTION_MIN_MEMORY = 512
+
+VOLUME_SIZE = 5000 # 5GB
 
 # Port IDs
 RPC_PORT_ID           = "rpc"
@@ -219,13 +220,10 @@ def get_config(
         constants.JWT_MOUNTPOINT_ON_CLIENTS: launcher.jwt_file,
     }
     if persistent:
+        size = int(participant.el_volume_size) if int(participant.el_volume_size) > 0 else VOLUME_SIZE
         files[EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER] = Directory(
             persistent_key="data-{0}".format(service_name),
-            size=int(participant.el_volume_size)
-            if int(participant.el_volume_size) > 0
-            else constants.VOLUME_SIZE[launcher.network][
-                constants.EL_TYPE.op_geth + "_volume_size"
-            ],
+            size=size,
         )
     env_vars = participant.el_extra_env_vars
     config_args = {
@@ -241,7 +239,7 @@ def get_config(
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
         "env_vars": env_vars,
         "labels": utils.label_maker(
-            client=constants.EL_TYPE.op_geth,
+            client="op-geth",
             client_type=constants.CLIENT_TYPES.el,
             image=participant.el_image,
             connected_client=cl_client_name,
