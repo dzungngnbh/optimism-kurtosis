@@ -1,9 +1,10 @@
 def new_port_spec(
     number,
     transport_protocol="TCP",
-    application_protocol="http",
+    application_protocol="http", # (http, udp, redis, postgresl)
     wait="15s", # default wait to 15s
 ):
+    transport_protocol = transport_protocol.upper()
     return PortSpec(
         number=number,
         transport_protocol=transport_protocol,

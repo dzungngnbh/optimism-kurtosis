@@ -6,6 +6,9 @@ input_parser = import_module("../../common/input_parser.star")
 node_metrics_info = import_module("../../common/node_metrics_info.star")
 utils = import_module("../../common/utils.star")
 
+# https://github.com/paradigmxyz/reth/pkgs/container/op-reth
+IMAGE = "ghcr.io/paradigmxyz/op-reth:v1.1.2"
+
 RPC_PORT_NUM = 8545
 WS_PORT_NUM = 8546
 DISCOVERY_PORT_NUM = 30303
@@ -30,7 +33,7 @@ METRICS_PATH = "/metrics"
 # The dirpath of the execution data directory on the client container
 EXECUTION_DATA_DIRPATH_ON_CLIENT_CONTAINER = "/data/op-reth/execution-data"
 
-def get_ports(discovery_port=DISCOVERY_PORT_NUM):
+def get_ports():
     return {
         RPC_PORT_ID: utils.new_port_spec(
             RPC_PORT_NUM,
@@ -42,7 +45,7 @@ def get_ports(discovery_port=DISCOVERY_PORT_NUM):
             DISCOVERY_PORT_NUM
         ),
         UDP_DISCOVERY_PORT_ID: utils.new_port_spec(
-            DISCOVERY_PORT_NUM
+            DISCOVERY_PORT_NUM, "udp"
         ),
         ENGINE_RPC_PORT_ID: utils.new_port_spec(
             ENGINE_RPC_PORT_NUM
@@ -138,7 +141,7 @@ def get_config(
 ):
     public_ports = {}
     discovery_port = DISCOVERY_PORT_NUM
-    ports = get_ports(discovery_port)
+    ports = get_ports()
 
     cmd = [
         "node",
@@ -206,7 +209,7 @@ def get_config(
     cmd += participant.el_extra_params
     env_vars = participant.el_extra_env_vars
     config_args = {
-        "image": participant.el_image,
+        "image": IMAGE,
         "ports": ports,
         "cmd": cmd,
         "files": files,
@@ -215,7 +218,7 @@ def get_config(
         "labels": utils.label_maker(
             client=constants.EL_TYPE.op_reth,
             client_type=constants.CLIENT_TYPES.el,
-            image=participant.el_image,
+            image=IMAGE,
             connected_client=cl_client_name,
             extra_labels=participant.el_extra_labels,
         ),
