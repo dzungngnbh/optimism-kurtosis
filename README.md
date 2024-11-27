@@ -1,4 +1,4 @@
-## Welcome to Gelato Optimism Kurtosis
+## Welcome to Optimism Kurtosis
 This deploys full L1 and op-stack testnet on a node.
 
 ## Default configuration

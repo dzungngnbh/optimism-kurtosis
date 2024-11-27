@@ -53,8 +53,8 @@ optimism_package:
           # Defaults to 0, which results in no resource limits
           el_min_cpu: 0
           el_max_cpu: 0
-          el_min_mem: 0
-          el_max_mem: 0
+          el_min_mem: 1000
+          el_max_mem: 2000
 
           # CL(Consensus Layer) Specific flags
           # The type of CL client that should be started
@@ -108,8 +108,8 @@ optimism_package:
           # Defaults to 0, which results in no resource limits
           cl_min_cpu: 0
           cl_max_cpu: 0
-          cl_min_mem: 0
-          cl_max_mem: 0
+          cl_min_mem: 1000
+          cl_max_mem: 2000
 
           # Participant specific flags
           # Node selector
